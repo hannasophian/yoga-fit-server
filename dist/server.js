@@ -15,9 +15,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const pg_1 = require("pg");
-const client = new pg_1.Client({ database: 'yogadb' });
-//TODO: this request for a connection will not necessarily complete before the first HTTP request is made!
-client.connect();
+//This line will read in any MY_KEY=myValue pairs in your .env file and
+// make them available as environment variables as properties of process.env
+// Example: if the file has
+// MY_KEY=myValue
+// we'd be able to access process.env.MY_KEY
+// Specifically, you should provide a DB connection string as DATABASE_URL in .env
+require("dotenv").config();
+if (!process.env.DATABASE_URL) {
+    throw "No DATABASE_URL env var!  Have you made a .env file?  And set up dotenv?";
+}
+// To connect to a heroku db you need to specify an object value for the ssl option
+// (however, if you want to connect to a local db you should set this property to false).
+const client = new pg_1.Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false,
+    },
+});
+function connectToDb() {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield client.connect();
+        // //Change the table name to match one in your heroku database!
+        // const result = await client.query("SELECT *  FROM vids;");
+        // for (let row of result.rows) {
+        //   console.log(row);
+        // }
+    });
+}
+connectToDb();
 const app = (0, express_1.default)();
 // Connect to front-end
 app.use((0, cors_1.default)());
@@ -61,4 +87,5 @@ app.get("/getvideo/:level/:duration/:tag", (req, res) => __awaiter(void 0, void 
         console.log(err);
     }
 }));
+// client.end();
 exports.default = app;

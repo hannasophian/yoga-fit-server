@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "start:dev": "ts-node-dev src"
+    "start:dev": "ts-node-dev src",
+    "start": "node dist"
   },
   "devDependencies": {
     "@types/cors": "^2.8.9",
