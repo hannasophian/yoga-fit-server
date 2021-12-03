@@ -31,12 +31,12 @@ app.get("/videos", async (req, res) => {
 
 
 //get random video when input level, duration, tag
-app.get<{ level: number, duration: string, tag: string }>("/getvideo/:level/:duration/:tag", async (req, res) => {
+app.get<{ level: number, duration: string, tag1: string, tag2:string, tag3:string }>("/getvideo/:level/:duration/:tag1/:tag2?/:tag3?/", async (req, res) => {
   try {
     const text =
       "SELECT * FROM vids JOIN vidtags ON vids.id = vidtags.id WHERE vidtags.tag = $3 AND vids.level <= $1 AND vids.duration <= $2 ORDER BY RANDOM() LIMIT 1;";
 
-    const video = await client.query(text, [req.params.level, req.params.duration, req.params.tag]);
+    const video = await client.query(text, [req.params.level, req.params.duration, req.params.tag1]);
 
     if (video.rowCount != 0) {
       res.status(200).json({
