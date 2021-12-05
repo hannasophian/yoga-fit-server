@@ -1,12 +1,10 @@
 import express from "express";
 import cors from "cors";
-import { Client } from "pg";
-
-
-const client = new Client({ database: 'yogadb' });
-
-//TODO: this request for a connection will not necessarily complete before the first HTTP request is made!
-client.connect();
+import getAllVideos from "./utils/getAllVideos";
+import getVideos1 from "./utils/getVideos1";
+// import { Client } from "pg";
+// const client = new Client({ database: 'yogadb' });
+// client.connect();
 
 
 const app = express();
@@ -20,7 +18,8 @@ app.use(express.json());
 
 //When this route is called, return the most recent 100 signatures in the db
 app.get("/videos", async (req, res) => {
-  const videos = await client.query('SELECT * FROM vids;'); //FIXME-TASK: get signatures from db!
+  // const videos = await client.query('SELECT * FROM vids;'); //FIXME-TASK: get signatures from db!
+  const videos = await getAllVideos()
   res.status(200).json({
     status: "success",
     data: {
@@ -31,18 +30,20 @@ app.get("/videos", async (req, res) => {
 
 
 //get random video when input level, duration, tag
-app.get<{ level: number, duration: string, tag1: string, tag2:string, tag3:string }>("/getvideo/:level/:duration/:tag1/:tag2?/:tag3?/", async (req, res) => {
-  try {
-    const text =
-      "SELECT * FROM vids JOIN vidtags ON vids.id = vidtags.id WHERE vidtags.tag = $3 AND vids.level <= $1 AND vids.duration <= $2 ORDER BY RANDOM() LIMIT 1;";
-
-    const video = await client.query(text, [req.params.level, req.params.duration, req.params.tag1]);
-
-    if (video.rowCount != 0) {
+app.get<{ level: number, duration: number, tag1: string, tag2:string, tag3:string }>("/getvideos/:level/:duration/:tag1/:tag2?/:tag3?/", async (req, res) => {
+  const level = req.params.level;
+  const duration = req.params.duration;
+  const tag1 = req.params.tag1;
+  const tag2 = req.params.tag2;
+  const tag3 = req.params.tag3; 
+  if (tag1 && !tag2) {
+    console.log("only one tag")
+    let videos = await getVideos1(level, duration, [tag1]);
+    if(videos) {
       res.status(200).json({
         status: "success",
         data: {
-          video
+          videos
         },
       });
     } else {
@@ -53,10 +54,15 @@ app.get<{ level: number, duration: string, tag1: string, tag2:string, tag3:strin
         },
       });
     }
-    
-  } catch(err) {
-    console.log(err)
-  } 
+    }
+    else {
+      res.status(404).json({
+        status: "fail",
+        data: {
+          id: "Could not find a video with those arguments.",
+        },
+      });
+    }
 })
 
 
