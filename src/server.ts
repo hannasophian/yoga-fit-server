@@ -16,16 +16,23 @@ app.use(cors());
  */
 app.use(express.json());
 
-//When this route is called, return the most recent 100 signatures in the db
+//Gets the whole list of videos
 app.get("/videos", async (req, res) => {
   // const videos = await client.query('SELECT * FROM vids;'); //FIXME-TASK: get signatures from db!
   const videos = await getAllVideos()
-  res.status(200).json({
-    status: "success",
-    data: {
-      videos
-    },
-  });
+  if (videos.rowCount != 0) {
+    let rows = videos.rows;
+    res.status(200).json({
+      status: "success",
+      data: {
+        rows
+      },
+    });
+  } else {
+    res.status(404).json({
+      status: "Not found",
+    })
+  }
 });
 
 
