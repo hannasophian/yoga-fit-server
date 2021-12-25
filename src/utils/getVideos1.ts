@@ -1,6 +1,7 @@
 import { Client } from "pg";
 const client = new Client({ database: "yogadb" });
 client.connect();
+import VideoItem from "./VideoItem"
 
 // algorithm to get Videos when 1 tag is selected
 export default async function getVideos1(
@@ -8,53 +9,63 @@ export default async function getVideos1(
   duration: number,
   tags: string[]
 ) {
-  let remainingDuration = duration;
+  /**
+   * PSEUDOCODE
+    try: 
+      set REMAINING_DURATION = DURATION
+      let SELECTED_VIDS be an empty array.
+      WHILE REMAINING_DURATION is more than DURATION * 0.2 AND larger than 5:
+        is there a video that has a duration < REMAINING_DURATION and tag = tag1?
+          yes:
+            add it to SELECTED VIDS
+            minus duration of video from REMAINING_DURATION
+          no:
+            add general video with duration less than remaining_duration to selected_vids
+            minus duration of video from REMAINING_DURAITON
+      if REMAINING_DURATION >= 5:
+        add general video with duration less than remaining_duration to selected_vids
+        minus duration of video from REMAINING_DURAITON
+    catch:
+      return empty array
+   */
+
   try {
-    // step 1
+    let remaining_duration = duration;
+    // let selectedVideos: VideoItem[] = [];
+    let selectedIDs: string[] = [];
     const text =
-      "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = $3 AND duration <= $2 AND duration >= $2 *0.8 AND level = $1 ORDER BY RANDOM() LIMIT 1;";
-    const video = await client.query(text, [level, duration, tags[0]]);
-    if (video.rowCount != 0) {
-      return [video];
-    } else {
-      // step 2
-      const text =
-        "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = $3 AND duration <= $2 AND level = $1 ORDER BY DURATION DESC LIMIT 1;";
-      const video = await client.query(text, [level, duration, tags[0]]);
-      if (video.rowCount != 0) {
-        if (remainingDuration >= 5) {
-          const text2 =
-            "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = 'general' AND duration <=  AND duration >= 0 ORDER BY RANDOM() LIMIT 1;";
-          const video2 = await client.query(text, [duration]);
-        }
-        return video;
+      "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = $2 AND duration <= $1 ORDER BY RANDOM() LIMIT 1;";
+    const generalText =
+      "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = 'general' AND duration <= $1 ORDER BY RANDOM() LIMIT 1;";
+    
+    while (remaining_duration > duration *0.2 && remaining_duration > 5) {
+      let possibleVideo = await client.query(text, [remaining_duration, tags[0]]);
+      // console.log(possibleVideo.rows)
+      if (possibleVideo.rowCount !== 0) {
+        // selectedVideos.push(possibleVideo.rows[0]);
+        selectedIDs.push(possibleVideo.rows[0].youtube_id);
+        remaining_duration -= possibleVideo.rows[0].duration;
       } else {
-        // step 3
-        const text =
-          "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = $3 AND duration <= $2 AND duration >= $2 *0.8 AND level = $1 - 1 ORDER BY RANDOM() LIMIT 1;";
-        const video = await client.query(text, [level, duration, tags[0]]);
-        if (video.rowCount != 0) {
-          return video;
-        } else {
-          // step 4
-          const text =
-            "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = $2 AND duration <= $1 ORDER BY DURATION DESC LIMIT 1;";
-          const video = await client.query(text, [duration, tags[0]]);
-          if (video.rowCount != 0) {
-            return video;
-          } else {
-            // step 5
-            const text =
-              "SELECT * FROM vids JOIN vidtags ON vids.id = vidtags.id WHERE tag = 'general' AND duration <= $1 ORDER BY RANDOM() LIMIT 1;";
-            const video = await client.query(text, [duration]);
-            if (video.rowCount != 0) {
-              return video;
-            }
-          }
+        possibleVideo = await client.query(generalText, [remaining_duration]);
+        if (possibleVideo.rowCount !== 0) {
+          // selectedVideos.push(possibleVideo.rows[0]);
+          selectedIDs.push(possibleVideo.rows[0].youtube_id);          remaining_duration -= possibleVideo.rows[0].duration;
         }
       }
     }
-  } catch (err) {
-    console.log(err);
+    if (remaining_duration >= 5) {
+      let possibleVideo = await client.query(generalText, [remaining_duration]);
+      if (possibleVideo.rowCount !== 0) {
+        // selectedVideos.push(possibleVideo.rows[0]);
+        selectedIDs.push(possibleVideo.rows[0].youtube_id);
+        remaining_duration -= possibleVideo.rows[0].duration;
+      }
+    }
+
+    return selectedIDs;
+  } catch {
+    return [];
   }
 }
+  
+
