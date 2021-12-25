@@ -5,8 +5,7 @@ import getVideos1 from "./utils/getVideos1";
 // import { Client } from "pg";
 // const client = new Client({ database: 'yogadb' });
 // client.connect();
-import { Client } from "pg";
-
+// import { Client } from "pg";
 
 //This line will read in any MY_KEY=myValue pairs in your .env file and
 // make them available as environment variables as properties of process.env
@@ -14,35 +13,33 @@ import { Client } from "pg";
 // MY_KEY=myValue
 // we'd be able to access process.env.MY_KEY
 // Specifically, you should provide a DB connection string as DATABASE_URL in .env
-require("dotenv").config();
+// require("dotenv").config();
 
-if (!process.env.DATABASE_URL) {
-  throw "No DATABASE_URL env var!  Have you made a .env file?  And set up dotenv?";
-}
+// if (!process.env.DATABASE_URL) {
+//   throw "No DATABASE_URL env var!  Have you made a .env file?  And set up dotenv?";
+// }
 
 // To connect to a heroku db you need to specify an object value for the ssl option
-  // (however, if you want to connect to a local db you should set this property to false).
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  });
+// (however, if you want to connect to a local db you should set this property to false).
+// const client = new Client({
+//   connectionString: process.env.DATABASE_URL,
+//   ssl: {
+//     rejectUnauthorized: false,
+//   },
+// });
 
-async function connectToDb() {
+// async function connectToDb() {
 
-  await client.connect();
+//   await client.connect();
 
-  // //Change the table name to match one in your heroku database!
-  // const result = await client.query("SELECT *  FROM vids;");
-  // for (let row of result.rows) {
-  //   console.log(row);
-  // }
-}
+//   // //Change the table name to match one in your heroku database!
+//   // const result = await client.query("SELECT *  FROM vids;");
+//   // for (let row of result.rows) {
+//   //   console.log(row);
+//   // }
+// }
 
-connectToDb();
-
-
+// connectToDb();
 
 const app = express();
 // Connect to front-end
@@ -67,32 +64,32 @@ app.get("/videos", async (req, res) => {
     });
   } else {
     res.status(404).json({
-      status: "Not found"
+      status: "Not found",
     });
   }
 });
 
 //Should only work for one tag:
 app.get<{
-    level: number;
-    duration: number;
-    tag1: string;
-  }>("/getvideos/:level/:duration/:tag1/", async (req, res) => {
-    const level = req.params.level;
-    const duration = req.params.duration;
-    const tags = [req.params.tag1];
-    let videoIDs = await getVideos1(level, duration, tags);
-    if (videoIDs.length !== 0) {
+  level: number;
+  duration: number;
+  tag1: string;
+}>("/getvideos/:level/:duration/:tag1/", async (req, res) => {
+  const level = req.params.level;
+  const duration = req.params.duration;
+  const tags = [req.params.tag1];
+  let videoIDs = await getVideos1(level, duration, tags);
+  if (videoIDs.length !== 0) {
     res.status(200).json({
       status: "success",
-      data: {videoIDs},
-    })
-    } else {
-      res.status(404).json({
-        status: "not found",
-      })
-    }
-  })
+      data: { videoIDs },
+    });
+  } else {
+    res.status(404).json({
+      status: "not found",
+    });
+  }
+});
 
 // client.end();
 
