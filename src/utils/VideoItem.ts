@@ -1,6 +1,6 @@
 // From tags JOIN tagvids
 
-export interface VideoRow {
+export default interface VideoItem {
   id: number;
   youtube_id: string;
   duration: number;
