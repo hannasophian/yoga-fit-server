@@ -2,9 +2,9 @@ import { Client } from "pg";
 import { config } from "dotenv";
 // const client = new Client({ database: "yogadb" });
 // client.connect();
-config();
+// config();
 
-// { rejectUnauthorized: false } - when connecting to a heroku DB
+// // { rejectUnauthorized: false } - when connecting to a heroku DB
 const herokuSSLSetting = {
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
@@ -12,10 +12,10 @@ const herokuSSLSetting = {
 const localSetting = {
   database: "yogadb"
 }
-const dbConfig = process.env.LOCAL ? localSetting : herokuSSLSetting;
-console.log(process.env.LOCAL)
-// console.log(sslSetting)
-// const dbConfig = ;
+const dbConfig = process.env.LOCAL ? herokuSSLSetting: localSetting;
+// console.log(process.env.LOCAL)
+// // console.log(sslSetting)
+// // const dbConfig = ;
 const client = new Client(dbConfig);
 
 async function clientConnect() {
