@@ -1,7 +1,7 @@
 import { Client } from "pg";
 const client = new Client({ database: "yogadb" });
 client.connect();
-import VideoItem from "./VideoItem"
+import VideoItem from "./VideoItem";
 
 // algorithm to get Videos when 1 tag is selected
 export default async function getVideos1(
@@ -37,9 +37,12 @@ export default async function getVideos1(
       "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = $2 AND duration <= $1 ORDER BY RANDOM() LIMIT 1;";
     const generalText =
       "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = 'general' AND duration <= $1 ORDER BY RANDOM() LIMIT 1;";
-    
-    while (remaining_duration > duration *0.2 && remaining_duration > 5) {
-      let possibleVideo = await client.query(text, [remaining_duration, tags[0]]);
+
+    while (remaining_duration > duration * 0.2 && remaining_duration > 5) {
+      let possibleVideo = await client.query(text, [
+        remaining_duration,
+        tags[0],
+      ]);
       // console.log(possibleVideo.rows)
       if (possibleVideo.rowCount !== 0) {
         // selectedVideos.push(possibleVideo.rows[0]);
@@ -49,7 +52,8 @@ export default async function getVideos1(
         possibleVideo = await client.query(generalText, [remaining_duration]);
         if (possibleVideo.rowCount !== 0) {
           // selectedVideos.push(possibleVideo.rows[0]);
-          selectedIDs.push(possibleVideo.rows[0].youtube_id);          remaining_duration -= possibleVideo.rows[0].duration;
+          selectedIDs.push(possibleVideo.rows[0].youtube_id);
+          remaining_duration -= possibleVideo.rows[0].duration;
         }
       }
     }
@@ -67,5 +71,3 @@ export default async function getVideos1(
     return [];
   }
 }
-  
-
