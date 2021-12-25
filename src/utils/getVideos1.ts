@@ -1,7 +1,27 @@
 import { Client } from "pg";
-const client = new Client({ database: "yogadb" });
-client.connect();
-import VideoItem from "./VideoItem";
+import { config } from "dotenv";
+// const client = new Client({ database: "yogadb" });
+// client.connect();
+config();
+
+// { rejectUnauthorized: false } - when connecting to a heroku DB
+const herokuSSLSetting = {
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+};
+const localSetting = {
+  database: "yogadb"
+}
+const dbConfig = process.env.LOCAL ? localSetting : herokuSSLSetting;
+console.log(process.env.LOCAL)
+// console.log(sslSetting)
+// const dbConfig = ;
+const client = new Client(dbConfig);
+
+async function clientConnect() {
+  await client.connect();
+}
+clientConnect();
 
 // algorithm to get Videos when 1 tag is selected
 export default async function getVideos1(
