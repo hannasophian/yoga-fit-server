@@ -33,16 +33,25 @@ app.get("/videos", async (req, res) => {
   }
 });
 
-//Should only work for one tag:
 app.get<{
   level: number;
   duration: number;
   tag1: string;
-}>("/getvideos/:level/:duration/:tag1/", async (req, res) => {
+  tag2: string;
+}>("/getvideos/:level/:duration/:tag1/:tag2?", async (req, res) => {
   const level = req.params.level;
   const duration = req.params.duration;
-  const tags = [req.params.tag1];
-  let videoIDs = await getVideos1(level, duration, tags);
+  let tags = [req.params.tag1];
+  tags = req.params.tag2 ? [...tags, req.params.tag2] : tags;
+  
+  let videoIDs: string[] = [];
+  switch (tags.length) {
+    case 1:
+      videoIDs = await getVideos1(level, duration, tags);
+      break;
+    case 2:
+      console.log(`There are two tags ${tags[0]} ${tags[1]}`);
+  }
   if (videoIDs.length !== 0) {
     res.status(200).json({
       status: "success",
@@ -55,47 +64,27 @@ app.get<{
   }
 });
 
-// client.end();
-
-//get random video when input level, duration, tag
+//Should only work for one tag:
 // app.get<{
 //   level: number;
 //   duration: number;
 //   tag1: string;
-//   tag2: string;
-//   tag3: string;
-// }>("/getvideos/:level/:duration/:tag1/:tag2?/:tag3?/", async (req, res) => {
+// }>("/getvideos/:level/:duration/:tag1/", async (req, res) => {
 //   const level = req.params.level;
 //   const duration = req.params.duration;
-//   const tag1 = req.params.tag1;
-//   const tag2 = req.params.tag2;
-//   const tag3 = req.params.tag3;
-//   if (tag1 && !tag2) {
-//     console.log("only one tag");
-//     let videos = await getVideos1(level, duration, [tag1]);
-//     if (videos) {
-//       res.status(200).json({
-//         status: "success",
-//         data: {
-//           videos,
-//         },
-//       });
-//     } else {
-//       res.status(404).json({
-//         status: "fail",
-//         data: {
-//           id: "Could not find a video with those arguments.",
-//         },
-//       });
-//     }
+//   const tags = [req.params.tag1];
+//   let videoIDs = await getVideos1(level, duration, tags);
+//   if (videoIDs.length !== 0) {
+//     res.status(200).json({
+//       status: "success",
+//       data: { videoIDs },
+//     });
 //   } else {
 //     res.status(404).json({
-//       status: "fail",
-//       data: {
-//         id: "Could not find a video with those arguments.",
-//       },
+//       status: "not found",
 //     });
 //   }
 // });
+
 
 export default app;
