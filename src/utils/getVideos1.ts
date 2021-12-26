@@ -12,8 +12,8 @@ const herokuSSLSetting = {
 const localSetting = {
   connectionString: process.env.DATABASE_URL,
   ssl: false,
-}
-const dbConfig = process.env.LOCAL ? localSetting: herokuSSLSetting;
+};
+const dbConfig = process.env.LOCAL ? localSetting : herokuSSLSetting;
 // console.log(process.env.LOCAL)
 // // console.log(sslSetting)
 // // const dbConfig = ;

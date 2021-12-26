@@ -2,8 +2,7 @@ import express from "express";
 import cors from "cors";
 import getAllVideos from "./utils/getAllVideos";
 import getVideos1 from "./utils/getVideos1";
-
-
+import getVideos2 from "./utils/getVideos2";
 
 const app = express();
 // Connect to front-end
@@ -43,14 +42,16 @@ app.get<{
   const duration = req.params.duration;
   let tags = [req.params.tag1];
   tags = req.params.tag2 ? [...tags, req.params.tag2] : tags;
-  
+
   let videoIDs: string[] = [];
   switch (tags.length) {
     case 1:
       videoIDs = await getVideos1(level, duration, tags);
       break;
     case 2:
-      console.log(`There are two tags ${tags[0]} ${tags[1]}`);
+      // console.log(`There are two tags ${tags[0]} ${tags[1]}`);
+      videoIDs = await getVideos2(level, duration, tags);
+      break;
   }
   if (videoIDs.length !== 0) {
     res.status(200).json({
@@ -85,6 +86,5 @@ app.get<{
 //     });
 //   }
 // });
-
 
 export default app;
