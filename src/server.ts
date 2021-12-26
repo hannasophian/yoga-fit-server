@@ -3,6 +3,7 @@ import cors from "cors";
 import getAllVideos from "./utils/getAllVideos";
 import getVideos1 from "./utils/getVideos1";
 import getVideos2 from "./utils/getVideos2";
+import getVideos3 from "./utils/getVideos3";
 
 const app = express();
 // Connect to front-end
@@ -45,7 +46,6 @@ app.get<{
   tags = req.params.tag2 ? [...tags, req.params.tag2] : tags;
   tags = req.params.tag3 ? [...tags, req.params.tag3] : tags;
 
-
   let videoIDs: string[] = [];
   switch (tags.length) {
     case 1:
@@ -56,7 +56,8 @@ app.get<{
       videoIDs = await getVideos2(level, duration, tags);
       break;
     case 3:
-      console.log(`There are 3 tags: ${tags}`)
+      // console.log(`There are 3 tags: ${tags}`)
+      videoIDs = await getVideos3(level, duration, tags);
       break;
   }
   if (videoIDs.length !== 0) {
@@ -103,7 +104,5 @@ app.get<{
 //     });
 //   }
 // });
-
-
 
 export default app;
