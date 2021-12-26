@@ -37,11 +37,14 @@ app.get<{
   duration: number;
   tag1: string;
   tag2: string;
-}>("/getvideos/:level/:duration/:tag1/:tag2?", async (req, res) => {
+  tag3: string;
+}>("/getvideos/:level/:duration/:tag1/:tag2?/:tag3?", async (req, res) => {
   const level = req.params.level;
   const duration = req.params.duration;
   let tags = [req.params.tag1];
   tags = req.params.tag2 ? [...tags, req.params.tag2] : tags;
+  tags = req.params.tag3 ? [...tags, req.params.tag3] : tags;
+
 
   let videoIDs: string[] = [];
   switch (tags.length) {
@@ -51,6 +54,9 @@ app.get<{
     case 2:
       // console.log(`There are two tags ${tags[0]} ${tags[1]}`);
       videoIDs = await getVideos2(level, duration, tags);
+      break;
+    case 3:
+      console.log(`There are 3 tags: ${tags}`)
       break;
   }
   if (videoIDs.length !== 0) {
@@ -65,16 +71,27 @@ app.get<{
   }
 });
 
-//Should only work for one tag:
 // app.get<{
 //   level: number;
 //   duration: number;
 //   tag1: string;
-// }>("/getvideos/:level/:duration/:tag1/", async (req, res) => {
+//   tag2: string;
+// }>("/getvideos/:level/:duration/:tag1/:tag2?", async (req, res) => {
 //   const level = req.params.level;
 //   const duration = req.params.duration;
-//   const tags = [req.params.tag1];
-//   let videoIDs = await getVideos1(level, duration, tags);
+//   let tags = [req.params.tag1];
+//   tags = req.params.tag2 ? [...tags, req.params.tag2] : tags;
+
+//   let videoIDs: string[] = [];
+//   switch (tags.length) {
+//     case 1:
+//       videoIDs = await getVideos1(level, duration, tags);
+//       break;
+//     case 2:
+//       // console.log(`There are two tags ${tags[0]} ${tags[1]}`);
+//       videoIDs = await getVideos2(level, duration, tags);
+//       break;
+//   }
 //   if (videoIDs.length !== 0) {
 //     res.status(200).json({
 //       status: "success",
@@ -86,5 +103,7 @@ app.get<{
 //     });
 //   }
 // });
+
+
 
 export default app;
