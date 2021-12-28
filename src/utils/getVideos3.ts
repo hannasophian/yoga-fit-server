@@ -3,6 +3,7 @@
 import { Client } from "pg";
 import { config } from "dotenv";
 import VideoItem from "./VideoItem";
+import generateQuery from "./generateQuery";
 // const client = new Client({ database: "yogadb" });
 // client.connect();
 config();
@@ -68,10 +69,10 @@ export default async function getVideos3(
     let remainingDuration = duration;
     // let selectedVideos: VideoItem[] = [];
     let selectedIDs: string[] = [];
-    const text =
-      "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = $2 AND duration <= $1 ORDER BY RANDOM() LIMIT 1;";
-    const generalText =
-      "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = 'general' AND duration <= $1 ORDER BY RANDOM() LIMIT 1;";
+    // const text =
+    //   "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = $2 AND duration <= $1 ORDER BY RANDOM() LIMIT 1;";
+    // const generalText =
+    //   "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = 'general' AND duration <= $1 ORDER BY RANDOM() LIMIT 1;";
 
     /** INITIAL */
     function shuffleArray(array: number[]) {
@@ -88,7 +89,8 @@ export default async function getVideos3(
     shuffleArray(arr);
 
     const firstDuration = Math.floor(remainingDuration * 0.4);
-    let possibleVideo = await client.query(text, [firstDuration, tags[arr[0]]]);
+    let possibleVideo = await client.query(generateQuery(tags[arr[0]], firstDuration, selectedIDs));
+      // text, [firstDuration, tags[arr[0]]]);
     if (possibleVideo.rowCount !== 0) {
       // selectedVideos.push(possibleVideo.rows[0]);
       selectedIDs.push(possibleVideo.rows[0].youtube_id);
@@ -96,14 +98,16 @@ export default async function getVideos3(
     }
 
     const secondDuration = Math.floor(remainingDuration * 0.5);
-    possibleVideo = await client.query(text, [secondDuration, tags[arr[1]]]);
+    possibleVideo = await client.query(generateQuery(tags[arr[1]], secondDuration, selectedIDs));
+      // text, [secondDuration, tags[arr[1]]]);
     if (possibleVideo.rowCount !== 0) {
       // selectedVideos.push(possibleVideo.rows[0]);
       selectedIDs.push(possibleVideo.rows[0].youtube_id);
       remainingDuration -= possibleVideo.rows[0].duration;
     }
 
-    possibleVideo = await client.query(text, [remainingDuration, tags[arr[2]]]);
+    possibleVideo = await client.query(generateQuery(tags[arr[2]], remainingDuration, selectedIDs));
+      //text, [remainingDuration, tags[arr[2]]]);
     if (possibleVideo.rowCount !== 0) {
       // selectedVideos.push(possibleVideo.rows[0]);
       selectedIDs.push(possibleVideo.rows[0].youtube_id);
@@ -112,16 +116,19 @@ export default async function getVideos3(
 
     /**EXTRA */
     while (remainingDuration > duration * 0.2 && remainingDuration >= 5) {
-      possibleVideo = await client.query(text, [
-        remainingDuration,
-        tags[Math.floor(Math.random() * 3)],
-      ]);
+      possibleVideo = await client.query(generateQuery(tags[Math.floor(Math.random() * 3)], remainingDuration, selectedIDs));
+        
+      //   text, [
+      //   remainingDuration,
+      //   tags[Math.floor(Math.random() * 3)],
+      // ]);
       if (possibleVideo.rowCount !== 0) {
         // selectedVideos.push(possibleVideo.rows[0]);
         selectedIDs.push(possibleVideo.rows[0].youtube_id);
         remainingDuration -= possibleVideo.rows[0].duration;
       } else {
-        possibleVideo = await client.query(generalText, [remainingDuration]);
+        possibleVideo = await client.query(generateQuery('general', remainingDuration, selectedIDs))
+        // generalText, [remainingDuration]);
         if (possibleVideo.rowCount !== 0) {
           // selectedVideos.push(possibleVideo.rows[0]);
           selectedIDs.push(possibleVideo.rows[0].youtube_id);
@@ -131,7 +138,7 @@ export default async function getVideos3(
     }
 
     if (remainingDuration >= 5) {
-      let possibleVideo = await client.query(generalText, [remainingDuration]);
+      let possibleVideo = await client.query(generateQuery('general', remainingDuration, selectedIDs))
       if (possibleVideo.rowCount !== 0) {
         // selectedVideos.push(possibleVideo.rows[0]);
         selectedIDs.push(possibleVideo.rows[0].youtube_id);
