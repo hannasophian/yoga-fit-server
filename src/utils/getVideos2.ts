@@ -3,6 +3,7 @@
 import { Client } from "pg";
 import { config } from "dotenv";
 import VideoItem from "./VideoItem";
+import generateQuery from "./generateQuery";
 // const client = new Client({ database: "yogadb" });
 // client.connect();
 config();
@@ -63,27 +64,20 @@ export default async function getVideos2(
     let remainingDuration = duration;
     // let selectedVideos: VideoItem[] = [];
     let selectedIDs: string[] = [];
-    const text =
-      "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = $2 AND duration <= $1 ORDER BY RANDOM() LIMIT 1;";
-    const generalText =
-      "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = 'general' AND duration <= $1 ORDER BY RANDOM() LIMIT 1;";
 
     /** INITIAL */
     const num1 = Math.floor(Math.random() * 2);
     const num2 = num1 === 1 ? 0 : 1;
 
     const twoThirdsDuration = Math.floor(remainingDuration * 0.667);
-    let possibleVideo = await client.query(text, [
-      twoThirdsDuration,
-      tags[num1],
-    ]);
+    let possibleVideo = await client.query(generateQuery(tags[num1], twoThirdsDuration, selectedIDs))
     if (possibleVideo.rowCount !== 0) {
       // selectedVideos.push(possibleVideo.rows[0]);
       selectedIDs.push(possibleVideo.rows[0].youtube_id);
       remainingDuration -= possibleVideo.rows[0].duration;
     }
 
-    possibleVideo = await client.query(text, [remainingDuration, tags[num2]]);
+    possibleVideo = await client.query(generateQuery(tags[num2], remainingDuration, selectedIDs));
     if (possibleVideo.rowCount !== 0) {
       // selectedVideos.push(possibleVideo.rows[0]);
       selectedIDs.push(possibleVideo.rows[0].youtube_id);
@@ -92,16 +86,14 @@ export default async function getVideos2(
 
     /**EXTRA */
     while (remainingDuration > duration * 0.2 && remainingDuration >= 5) {
-      possibleVideo = await client.query(text, [
-        remainingDuration,
-        tags[Math.floor(Math.random() * 2)],
-      ]);
+      possibleVideo = await client.query(generateQuery(tags[Math.floor(Math.random() * 2)], remainingDuration, selectedIDs));
       if (possibleVideo.rowCount !== 0) {
         // selectedVideos.push(possibleVideo.rows[0]);
         selectedIDs.push(possibleVideo.rows[0].youtube_id);
         remainingDuration -= possibleVideo.rows[0].duration;
       } else {
-        possibleVideo = await client.query(generalText, [remainingDuration]);
+        possibleVideo = await client.query(generateQuery('general', remainingDuration, selectedIDs))
+        // , [remainingDuration]);
         if (possibleVideo.rowCount !== 0) {
           // selectedVideos.push(possibleVideo.rows[0]);
           selectedIDs.push(possibleVideo.rows[0].youtube_id);
@@ -111,7 +103,7 @@ export default async function getVideos2(
     }
 
     if (remainingDuration >= 5) {
-      let possibleVideo = await client.query(generalText, [remainingDuration]);
+      let possibleVideo = await client.query(generateQuery('general', remainingDuration, selectedIDs));
       if (possibleVideo.rowCount !== 0) {
         //   selectedVideos.push(possibleVideo.rows[0]);
         selectedIDs.push(possibleVideo.rows[0].youtube_id);
