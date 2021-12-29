@@ -4,6 +4,6 @@ export default function generateQuery(tag: string, maxDuration: number, existing
         queryText += ` AND vids.youtube_id != '${id}'`
     }
     queryText += " ORDER BY RANDOM() LIMIT 1;";
-    console.log(queryText);
+    // console.log(queryText);
     return queryText;
 }
