@@ -1,11 +1,11 @@
 import { Client } from "pg";
 import { config } from "dotenv";
-import generateQuery from "./generateQuery"
+import generateQuery from "./generateQuery";
 // const client = new Client({ database: "yogadb" });
 // client.connect();
 config();
 
-// // { rejectUnauthorized: false } - when connecting to a heroku DB
+// { rejectUnauthorized: false } - when connecting to a heroku DB
 const herokuSSLSetting = {
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
@@ -15,9 +15,6 @@ const localSetting = {
   ssl: false,
 };
 const dbConfig = process.env.LOCAL ? localSetting : herokuSSLSetting;
-// console.log(process.env.LOCAL)
-// // console.log(sslSetting)
-// // const dbConfig = ;
 const client = new Client(dbConfig);
 
 async function clientConnect() {
@@ -53,33 +50,29 @@ export default async function getVideos1(
 
   try {
     let remainingDuration = duration;
-    // let selectedVideos: VideoItem[] = [];
     let selectedIDs: string[] = [];
-    // const text =
-    //   "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = $2 AND duration <= $1 ORDER BY RANDOM() LIMIT 1;";
-    // const generalText =
-      // "SELECT * FROM vids join vidtags ON vids.id = vidtags.id WHERE tag = 'general' AND duration <= $1 ORDER BY RANDOM() LIMIT 1;";
-
     while (remainingDuration > duration * 0.2 && remainingDuration > 5) {
-      let possibleVideo = await client.query(generateQuery(tags[0], remainingDuration, selectedIDs));
-      // console.log(possibleVideo.rows)
+      let possibleVideo = await client.query(
+        generateQuery(tags[0], remainingDuration, selectedIDs)
+      );
       if (possibleVideo.rowCount !== 0) {
-        // selectedVideos.push(possibleVideo.rows[0]);
         selectedIDs.push(possibleVideo.rows[0].youtube_id);
         remainingDuration -= possibleVideo.rows[0].duration;
       } else {
-        possibleVideo = await client.query(generateQuery('general', remainingDuration, selectedIDs));
+        possibleVideo = await client.query(
+          generateQuery("general", remainingDuration, selectedIDs)
+        );
         if (possibleVideo.rowCount !== 0) {
-          // selectedVideos.push(possibleVideo.rows[0]);
           selectedIDs.push(possibleVideo.rows[0].youtube_id);
           remainingDuration -= possibleVideo.rows[0].duration;
         }
       }
     }
     if (remainingDuration >= 5) {
-      let possibleVideo = await client.query(generateQuery('general', remainingDuration, selectedIDs));
+      let possibleVideo = await client.query(
+        generateQuery("general", remainingDuration, selectedIDs)
+      );
       if (possibleVideo.rowCount !== 0) {
-        // selectedVideos.push(possibleVideo.rows[0]);
         selectedIDs.push(possibleVideo.rows[0].youtube_id);
         remainingDuration -= possibleVideo.rows[0].duration;
       }
