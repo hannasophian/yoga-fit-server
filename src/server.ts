@@ -4,6 +4,8 @@ import getAllVideos from "./utils/getAllVideos";
 import getVideos1 from "./utils/getVideos1";
 import getVideos2 from "./utils/getVideos2";
 import getVideos3 from "./utils/getVideos3";
+import { toNamespacedPath } from "path/posix";
+import userExistsByEmail from "./utils/userExistsByEmail";
 
 const app = express();
 
@@ -72,11 +74,9 @@ app.get<{
       videoIDs = await getVideos1(level, duration, tags);
       break;
     case 2:
-      // console.log(`There are two tags ${tags[0]} ${tags[1]}`);
       videoIDs = await getVideos2(level, duration, tags);
       break;
     case 3:
-      // console.log(`There are 3 tags: ${tags}`)
       videoIDs = await getVideos3(level, duration, tags);
       break;
   }
@@ -88,6 +88,29 @@ app.get<{
   } else {
     res.status(404).json({
       status: "not found",
+    });
+  }
+});
+
+// When creating a new user:
+// - Check that a user with the email doesn't already exist
+// - Create user
+app.post("/newuser", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const userExists = await userExistsByEmail(email);
+
+    if (userExists) {
+      res.status(403).json({
+        status: "Error",
+        message: "User with that email already exists",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      status: "Error",
+      message: "Something went wrong",
     });
   }
 });
