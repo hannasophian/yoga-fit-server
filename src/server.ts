@@ -6,6 +6,8 @@ import getVideos2 from "./utils/getVideos2";
 import getVideos3 from "./utils/getVideos3";
 import { toNamespacedPath } from "path/posix";
 import userExistsByEmail from "./utils/userExistsByEmail";
+import createNewUser from "./utils/createNewUser";
+import UserInterface from "./utils/UserInterface";
 
 const app = express();
 
@@ -105,6 +107,21 @@ app.post("/newuser", async (req, res) => {
         status: "Error",
         message: "User with that email already exists",
       });
+    } else {
+      const dbRes: UserInterface[] = await createNewUser(email, name, password);
+
+      if (dbRes.length !== 0) {
+        res.status(201).json({
+          status: "Success",
+          message: "New user created",
+          user: { id: dbRes[0].id, name: dbRes[0].name, email: dbRes[0].email },
+        });
+      } else {
+        res.status(400).json({
+          status: "Error",
+          message: "Something went wrong",
+        });
+      }
     }
   } catch (error) {
     console.error(error);
