@@ -8,6 +8,7 @@ import { toNamespacedPath } from "path/posix";
 import userExistsByEmail from "./utils/userExistsByEmail";
 import createNewUser from "./utils/createNewUser";
 import UserInterface from "./utils/UserInterface";
+import sendVerificationEmail from "./utils/sendVerificationEmail";
 
 const app = express();
 
@@ -111,6 +112,7 @@ app.post("/newuser", async (req, res) => {
       const dbRes: UserInterface[] = await createNewUser(email, name, password);
 
       if (dbRes.length !== 0) {
+        sendVerificationEmail(dbRes[0].name, dbRes[0].email, dbRes[0].id);
         res.status(201).json({
           status: "Success",
           message: "New user created",
@@ -132,4 +134,16 @@ app.post("/newuser", async (req, res) => {
   }
 });
 
+// Endpoint to activate a user account
+// app.put<{user_id: number}>("/activate/:user_id", (req, res) => {
+//   try {
+
+//   } catch(err) {
+//     console.error(err);
+//     res.status(400).json({
+//       status: "Error",
+//       message: "Something went wrong",
+//     });
+//   }
+// })
 export default app;
