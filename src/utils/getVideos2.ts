@@ -4,11 +4,8 @@ import { Client } from "pg";
 import { config } from "dotenv";
 import VideoItem from "./VideoItem";
 import generateQuery from "./generateQuery";
-// const client = new Client({ database: "yogadb" });
-// client.connect();
-config();
 
-// // { rejectUnauthorized: false } - when connecting to a heroku DB
+config();
 const herokuSSLSetting = {
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
@@ -62,7 +59,6 @@ export default async function getVideos2(
 
   try {
     let remainingDuration = duration;
-    // let selectedVideos: VideoItem[] = [];
     let selectedIDs: string[] = [];
 
     /** INITIAL */
@@ -70,32 +66,39 @@ export default async function getVideos2(
     const num2 = num1 === 1 ? 0 : 1;
 
     const twoThirdsDuration = Math.floor(remainingDuration * 0.667);
-    let possibleVideo = await client.query(generateQuery(tags[num1], twoThirdsDuration, selectedIDs))
+    let possibleVideo = await client.query(
+      generateQuery(tags[num1], twoThirdsDuration, selectedIDs)
+    );
     if (possibleVideo.rowCount !== 0) {
-      // selectedVideos.push(possibleVideo.rows[0]);
       selectedIDs.push(possibleVideo.rows[0].youtube_id);
       remainingDuration -= possibleVideo.rows[0].duration;
     }
 
-    possibleVideo = await client.query(generateQuery(tags[num2], remainingDuration, selectedIDs));
+    possibleVideo = await client.query(
+      generateQuery(tags[num2], remainingDuration, selectedIDs)
+    );
     if (possibleVideo.rowCount !== 0) {
-      // selectedVideos.push(possibleVideo.rows[0]);
       selectedIDs.push(possibleVideo.rows[0].youtube_id);
       remainingDuration -= possibleVideo.rows[0].duration;
     }
 
     /**EXTRA */
     while (remainingDuration > duration * 0.2 && remainingDuration >= 5) {
-      possibleVideo = await client.query(generateQuery(tags[Math.floor(Math.random() * 2)], remainingDuration, selectedIDs));
+      possibleVideo = await client.query(
+        generateQuery(
+          tags[Math.floor(Math.random() * 2)],
+          remainingDuration,
+          selectedIDs
+        )
+      );
       if (possibleVideo.rowCount !== 0) {
-        // selectedVideos.push(possibleVideo.rows[0]);
         selectedIDs.push(possibleVideo.rows[0].youtube_id);
         remainingDuration -= possibleVideo.rows[0].duration;
       } else {
-        possibleVideo = await client.query(generateQuery('general', remainingDuration, selectedIDs))
-        // , [remainingDuration]);
+        possibleVideo = await client.query(
+          generateQuery("general", remainingDuration, selectedIDs)
+        );
         if (possibleVideo.rowCount !== 0) {
-          // selectedVideos.push(possibleVideo.rows[0]);
           selectedIDs.push(possibleVideo.rows[0].youtube_id);
           remainingDuration -= possibleVideo.rows[0].duration;
         }
@@ -103,16 +106,14 @@ export default async function getVideos2(
     }
 
     if (remainingDuration >= 5) {
-      let possibleVideo = await client.query(generateQuery('general', remainingDuration, selectedIDs));
+      let possibleVideo = await client.query(
+        generateQuery("general", remainingDuration, selectedIDs)
+      );
       if (possibleVideo.rowCount !== 0) {
-        //   selectedVideos.push(possibleVideo.rows[0]);
         selectedIDs.push(possibleVideo.rows[0].youtube_id);
         remainingDuration -= possibleVideo.rows[0].duration;
       }
     }
-
-    // console.log(selectedVideos)
-    // console.log(selectedIDs)
 
     return selectedIDs;
   } catch {

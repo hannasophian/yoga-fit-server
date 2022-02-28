@@ -89,8 +89,10 @@ export default async function getVideos3(
     shuffleArray(arr);
 
     const firstDuration = Math.floor(remainingDuration * 0.4);
-    let possibleVideo = await client.query(generateQuery(tags[arr[0]], firstDuration, selectedIDs));
-      // text, [firstDuration, tags[arr[0]]]);
+    let possibleVideo = await client.query(
+      generateQuery(tags[arr[0]], firstDuration, selectedIDs)
+    );
+    // text, [firstDuration, tags[arr[0]]]);
     if (possibleVideo.rowCount !== 0) {
       // selectedVideos.push(possibleVideo.rows[0]);
       selectedIDs.push(possibleVideo.rows[0].youtube_id);
@@ -98,16 +100,20 @@ export default async function getVideos3(
     }
 
     const secondDuration = Math.floor(remainingDuration * 0.5);
-    possibleVideo = await client.query(generateQuery(tags[arr[1]], secondDuration, selectedIDs));
-      // text, [secondDuration, tags[arr[1]]]);
+    possibleVideo = await client.query(
+      generateQuery(tags[arr[1]], secondDuration, selectedIDs)
+    );
+    // text, [secondDuration, tags[arr[1]]]);
     if (possibleVideo.rowCount !== 0) {
       // selectedVideos.push(possibleVideo.rows[0]);
       selectedIDs.push(possibleVideo.rows[0].youtube_id);
       remainingDuration -= possibleVideo.rows[0].duration;
     }
 
-    possibleVideo = await client.query(generateQuery(tags[arr[2]], remainingDuration, selectedIDs));
-      //text, [remainingDuration, tags[arr[2]]]);
+    possibleVideo = await client.query(
+      generateQuery(tags[arr[2]], remainingDuration, selectedIDs)
+    );
+    //text, [remainingDuration, tags[arr[2]]]);
     if (possibleVideo.rowCount !== 0) {
       // selectedVideos.push(possibleVideo.rows[0]);
       selectedIDs.push(possibleVideo.rows[0].youtube_id);
@@ -116,8 +122,14 @@ export default async function getVideos3(
 
     /**EXTRA */
     while (remainingDuration > duration * 0.2 && remainingDuration >= 5) {
-      possibleVideo = await client.query(generateQuery(tags[Math.floor(Math.random() * 3)], remainingDuration, selectedIDs));
-        
+      possibleVideo = await client.query(
+        generateQuery(
+          tags[Math.floor(Math.random() * 3)],
+          remainingDuration,
+          selectedIDs
+        )
+      );
+
       //   text, [
       //   remainingDuration,
       //   tags[Math.floor(Math.random() * 3)],
@@ -127,7 +139,9 @@ export default async function getVideos3(
         selectedIDs.push(possibleVideo.rows[0].youtube_id);
         remainingDuration -= possibleVideo.rows[0].duration;
       } else {
-        possibleVideo = await client.query(generateQuery('general', remainingDuration, selectedIDs))
+        possibleVideo = await client.query(
+          generateQuery("general", remainingDuration, selectedIDs)
+        );
         // generalText, [remainingDuration]);
         if (possibleVideo.rowCount !== 0) {
           // selectedVideos.push(possibleVideo.rows[0]);
@@ -138,7 +152,9 @@ export default async function getVideos3(
     }
 
     if (remainingDuration >= 5) {
-      let possibleVideo = await client.query(generateQuery('general', remainingDuration, selectedIDs))
+      let possibleVideo = await client.query(
+        generateQuery("general", remainingDuration, selectedIDs)
+      );
       if (possibleVideo.rowCount !== 0) {
         // selectedVideos.push(possibleVideo.rows[0]);
         selectedIDs.push(possibleVideo.rows[0].youtube_id);
