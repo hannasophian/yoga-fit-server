@@ -9,6 +9,7 @@ import userExistsByEmail from "./utils/userExistsByEmail";
 import createNewUser from "./utils/createNewUser";
 import UserInterface from "./utils/UserInterface";
 import sendVerificationEmail from "./utils/sendVerificationEmail";
+import activateAccount from "./utils/activateAccount";
 
 const app = express();
 
@@ -135,15 +136,21 @@ app.post("/newuser", async (req, res) => {
 });
 
 // Endpoint to activate a user account
-// app.put<{user_id: number}>("/activate/:user_id", (req, res) => {
-//   try {
-
-//   } catch(err) {
-//     console.error(err);
-//     res.status(400).json({
-//       status: "Error",
-//       message: "Something went wrong",
-//     });
-//   }
-// })
+// activate the user account
+app.put<{ user_id: number }>("/activate/:user_id", async (req, res) => {
+  try {
+    const dbRes: UserInterface[] = await activateAccount(req.params.user_id);
+    res.status(200).json({
+      status: "Success",
+      message: "Account activated",
+      user: { id: dbRes[0].id, name: dbRes[0].name, email: dbRes[0].email },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({
+      status: "Error",
+      message: "Something went wrong",
+    });
+  }
+});
 export default app;
