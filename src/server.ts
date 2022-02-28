@@ -10,6 +10,7 @@ import createNewUser from "./utils/createNewUser";
 import UserInterface from "./utils/UserInterface";
 import sendVerificationEmail from "./utils/sendVerificationEmail";
 import activateAccount from "./utils/activateAccount";
+import signIn from "./utils/signIn";
 
 const app = express();
 
@@ -145,6 +146,36 @@ app.put<{ user_id: number }>("/activate/:user_id", async (req, res) => {
       message: "Account activated",
       user: { id: dbRes[0].id, name: dbRes[0].name, email: dbRes[0].email },
     });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({
+      status: "Error",
+      message: "Something went wrong",
+    });
+  }
+});
+
+app.get("/signin", async (req, res) => {
+  try {
+    const { password, email } = req.body;
+    const response: UserInterface[] = await signIn(email, password);
+    if (response.length !== 0) {
+      res.status(200).json({
+        status: "Success",
+        message: "Signed In",
+        user: {
+          id: response[0].id,
+          name: response[0].name,
+          email: response[0].email,
+          active: response[0].active,
+        },
+      });
+    } else {
+      res.status(401).json({
+        status: "Error",
+        message: "Wrong password or wrong email",
+      });
+    }
   } catch (err) {
     console.error(err);
     res.status(400).json({
