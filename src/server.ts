@@ -1,16 +1,15 @@
 import express from "express";
 import cors from "cors";
-import getAllVideos from "./utils/getAllVideos";
-import getVideos1 from "./utils/getVideos1";
-import getVideos2 from "./utils/getVideos2";
-import getVideos3 from "./utils/getVideos3";
-import { toNamespacedPath } from "path/posix";
-import userExistsByEmail from "./utils/userExistsByEmail";
-import createNewUser from "./utils/createNewUser";
-import UserInterface from "./utils/UserInterface";
-import sendVerificationEmail from "./utils/sendVerificationEmail";
-import activateAccount from "./utils/activateAccount";
-import signIn from "./utils/signIn";
+import getAllVideos from "./utils/video_functions/getAllVideos";
+import getVideos1 from "./utils/video_functions/getVideos1";
+import getVideos2 from "./utils/video_functions/getVideos2";
+import getVideos3 from "./utils/video_functions/getVideos3";
+import userExistsByEmail from "./utils/user_functions/userExistsByEmail";
+import createNewUser from "./utils/user_functions/createNewUser";
+import UserInterface from "./utils/interface/UserInterface";
+import sendVerificationEmail from "./utils/user_functions/sendVerificationEmail";
+import activateAccount from "./utils/user_functions/activateAccount";
+import signIn from "./utils/user_functions/signIn";
 
 const app = express();
 
@@ -100,7 +99,7 @@ app.get<{
 // When creating a new user:
 // - Check that a user with the email doesn't already exist
 // - Create user
-app.post("/newuser", async (req, res) => {
+app.post("/user", async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const userExists = await userExistsByEmail(email);
@@ -138,7 +137,7 @@ app.post("/newuser", async (req, res) => {
 
 // Endpoint to activate a user account
 // activate the user account
-app.put<{ user_id: number }>("/activate/:user_id", async (req, res) => {
+app.put<{ user_id: number }>("/user/activate/:user_id", async (req, res) => {
   try {
     const dbRes: UserInterface[] = await activateAccount(req.params.user_id);
     res.status(200).json({
@@ -155,7 +154,7 @@ app.put<{ user_id: number }>("/activate/:user_id", async (req, res) => {
   }
 });
 
-app.get("/signin", async (req, res) => {
+app.get("/user/signin", async (req, res) => {
   try {
     const { password, email } = req.body;
     const response: UserInterface[] = await signIn(email, password);

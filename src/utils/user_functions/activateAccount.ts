@@ -1,6 +1,6 @@
 import { Client } from "pg";
 import { config } from "dotenv";
-import generateQuery from "./generateQuery";
+import UserInterface from "../interface/UserInterface";
 // const client = new Client({ database: "yogadb" });
 // client.connect();
 config();
@@ -22,14 +22,17 @@ async function clientConnect() {
 }
 clientConnect();
 
-export default async function userExistsByEmail(email: string) {
-  let possibleUser = await client.query(
-    "SELECT * FROM users WHERE email = $1;",
-    [email]
-  );
-  if (possibleUser.rowCount === 0) {
-    return false;
-  } else {
-    return true;
+export default async function activateAccount(
+  id: number
+): Promise<UserInterface[]> {
+  try {
+    const dbRes = await client.query(
+      "UPDATE users SET active = TRUE WHERE id = $1 RETURNING id, name, email, active;",
+      [id]
+    );
+    return dbRes.rows;
+  } catch (err) {
+    console.error(err);
+    return [];
   }
 }
