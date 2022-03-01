@@ -1,7 +1,6 @@
 import { Client } from "pg";
 import { config } from "dotenv";
-import generateQuery from "./generateQuery";
-import UserInterface from "./UserInterface";
+import UserInterface from "../interface/UserInterface";
 // const client = new Client({ database: "yogadb" });
 // client.connect();
 config();

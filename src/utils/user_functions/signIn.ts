@@ -1,6 +1,6 @@
 import { Client } from "pg";
 import { config } from "dotenv";
-import UserInterface from "./UserInterface";
+import UserInterface from "../interface/UserInterface";
 // import UserInterface from "./UserInterface";
 // const client = new Client({ database: "yogadb" });
 // client.connect();
