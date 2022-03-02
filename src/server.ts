@@ -10,6 +10,7 @@ import UserInterface from "./utils/interface/UserInterface";
 import sendVerificationEmail from "./utils/user_functions/sendVerificationEmail";
 import activateAccount from "./utils/user_functions/activateAccount";
 import signIn from "./utils/user_functions/signIn";
+import isFromWebsite from "./utils/isFromWebsite";
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use(
       // allow requests with no origin
       // (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
+      if (isFromWebsite(origin)) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
         const msg =
           "The CORS policy for this site does not " +
